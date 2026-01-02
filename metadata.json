@@ -1,0 +1,5 @@
+{
+  "name": "Co-Narrator: Live AI Collaboration",
+  "description": "Real-time collaborative writing suite where a host leads an AI-assisted narrative with documents, while viewers can watch live and propose contributions.",
+  "requestFramePermissions": []
+}

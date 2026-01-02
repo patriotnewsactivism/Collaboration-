@@ -1,0 +1,52 @@
+
+@if (collab.userRole() === 'unset') {
+  <div class="h-screen w-screen flex items-center justify-center bg-gray-900 p-4">
+    <div class="max-w-md w-full bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-8 text-center space-y-6">
+      <div class="space-y-2">
+        <div class="h-16 w-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-blue-500/20 mb-4">
+           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+           </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-white tracking-tight">Co-Narrator</h1>
+        <p class="text-gray-400">Real-time AI collaboration suite.</p>
+      </div>
+
+      <div class="space-y-3">
+        <button 
+          (click)="selectRole('host')"
+          class="w-full py-4 px-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
+          Start as Host
+        </button>
+        <button 
+          (click)="selectRole('viewer')"
+          class="w-full py-4 px-6 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] border border-gray-600 flex items-center justify-center gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          Join as Viewer
+        </button>
+      </div>
+      
+      <p class="text-xs text-gray-500 pt-4 border-t border-gray-700">
+        Tip: Open this app in a second tab to test the live sync features!
+      </p>
+    </div>
+  </div>
+} @else {
+  <div class="flex h-screen w-screen overflow-hidden">
+    <!-- Main Chat Area -->
+    <div class="flex-1 min-w-0 z-0">
+       <app-chat-view></app-chat-view>
+    </div>
+
+    <!-- Sidebar (Docs & Suggestions) -->
+    <div class="w-80 flex-shrink-0 z-10 shadow-xl border-l border-gray-800">
+       <app-doc-manager></app-doc-manager>
+    </div>
+  </div>
+}
