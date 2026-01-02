@@ -13,15 +13,15 @@ import { MarkdownPipe } from '../pipes/markdown.pipe';
   template: `
     <div class="flex flex-col h-full bg-gray-900 text-white relative">
       <!-- Header -->
-      <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800 shadow-sm z-10">
-        <div>
-          <h2 class="text-lg font-semibold text-gray-100 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="p-3 md:p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800 shadow-sm z-10 shrink-0">
+        <div class="min-w-0">
+          <h2 class="text-base md:text-lg font-semibold text-gray-100 flex items-center gap-2 truncate">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
             </svg>
-            Live Narrative Stream
+            <span class="truncate">Live Narrative Stream</span>
           </h2>
-          <p class="text-xs text-gray-400 mt-0.5">
+          <p class="text-[10px] md:text-xs text-gray-400 mt-0.5 truncate">
             @if(collab.userRole() === 'host') {
               You are the Host (Broadcasting)
             } @else {
@@ -29,29 +29,29 @@ import { MarkdownPipe } from '../pipes/markdown.pipe';
             }
           </p>
         </div>
-        <div class="flex items-center gap-2">
-           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-             <span class="w-2 h-2 mr-1.5 bg-green-400 rounded-full animate-pulse"></span>
+        <div class="flex items-center gap-2 shrink-0">
+           <span class="inline-flex items-center px-2 md:px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-medium bg-green-100 text-green-800">
+             <span class="w-1.5 h-1.5 md:w-2 md:h-2 mr-1.5 bg-green-400 rounded-full animate-pulse"></span>
              Live
            </span>
         </div>
       </div>
 
       <!-- Messages Area -->
-      <div #scrollContainer class="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
+      <div #scrollContainer class="flex-1 overflow-y-auto p-3 md:p-4 space-y-4 md:space-y-6 scroll-smooth">
         @for (msg of collab.messages(); track msg.id) {
           <div class="flex flex-col gap-1 animate-fadeIn" 
                [class.items-end]="msg.role === 'host'"
                [class.items-start]="msg.role === 'ai'">
             
-            <div class="flex items-center gap-2 text-xs text-gray-400 px-1">
+            <div class="flex items-center gap-2 text-[10px] md:text-xs text-gray-400 px-1">
                <span class="font-medium">
                  {{ msg.role === 'host' ? 'Host' : 'Co-Narrator AI' }}
                </span>
                <span>{{ msg.timestamp | date:'shortTime' }}</span>
             </div>
 
-            <div class="max-w-[85%] rounded-2xl p-4 shadow-md leading-relaxed"
+            <div class="max-w-[90%] md:max-w-[85%] rounded-2xl p-3 md:p-4 shadow-md leading-relaxed text-sm md:text-base"
                  [class.bg-blue-600]="msg.role === 'host'"
                  [class.text-white]="msg.role === 'host'"
                  [class.bg-gray-800]="msg.role === 'ai'"
@@ -81,35 +81,38 @@ import { MarkdownPipe } from '../pipes/markdown.pipe';
                 </div>
             </div>
         }
+        
+        <!-- Spacer for auto-scroll visibility -->
+        <div class="h-2"></div>
       </div>
 
       <!-- Host Input Area -->
       @if (collab.userRole() === 'host') {
-        <div class="p-4 bg-gray-800 border-t border-gray-700">
+        <div class="p-3 md:p-4 bg-gray-800 border-t border-gray-700 shrink-0">
           <div class="relative">
             <textarea
               [(ngModel)]="inputText"
               (keydown.enter)="handleEnter($event)"
               placeholder="Type your narrative instruction here..."
-              class="w-full bg-gray-900 text-white rounded-xl border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 p-4 pr-12 resize-none shadow-inner h-24 placeholder-gray-500"
+              class="w-full bg-gray-900 text-white rounded-xl border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 p-3 md:p-4 pr-12 resize-none shadow-inner h-16 md:h-24 placeholder-gray-500 text-base"
               [disabled]="isGenerating()"></textarea>
             
             <button 
               (click)="sendMessage()"
               [disabled]="!inputText.trim() || isGenerating()"
-              class="absolute right-3 bottom-3 p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              class="absolute right-2 bottom-2 md:right-3 md:bottom-3 p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
             </button>
           </div>
-          <p class="text-xs text-gray-500 mt-2 text-center">
+          <p class="hidden md:block text-xs text-gray-500 mt-2 text-center">
             Press Enter to send, Shift+Enter for new line
           </p>
         </div>
       } @else {
-        <div class="p-4 bg-gray-800 border-t border-gray-700 text-center text-gray-400 italic">
-          Only the host can add to the main narrative. You can send suggestions from the sidebar.
+        <div class="p-4 bg-gray-800 border-t border-gray-700 text-center text-gray-400 italic text-sm md:text-base shrink-0">
+          Only the host can add to the main narrative. You can send suggestions from the Docs tab.
         </div>
       }
     </div>
