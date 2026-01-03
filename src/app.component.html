@@ -38,56 +38,38 @@
     </div>
   </div>
 } @else {
-  <div class="flex flex-col h-screen w-screen overflow-hidden bg-gray-900">
+  <div class="relative h-screen w-screen">
+    <div class="flex flex-col h-full w-full overflow-hidden bg-gray-900">
+      
+      <!-- Content Area: Flex row on Desktop, Stacked/Switched on Mobile -->
+      <div class="flex-1 flex overflow-hidden relative">
+        <div class="flex-1 min-w-0 flex flex-col z-0 transition-opacity duration-200 md:flex" [class.hidden]="activeMobileTab() === 'docs'">
+           <app-chat-view class="h-full w-full"></app-chat-view>
+        </div>
+        <div class="w-full md:w-80 flex-shrink-0 z-10 shadow-xl border-l border-gray-800 bg-gray-950 transition-transform duration-200 md:flex" [class.hidden]="activeMobileTab() === 'chat'">
+           <app-doc-manager class="h-full w-full"></app-doc-manager>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
+      <div class="md:hidden bg-gray-800 border-t border-gray-700 h-16 flex flex-shrink-0 z-50 pb-safe">
+        <button (click)="activeMobileTab.set('chat')" class="flex-1 flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors" [class.text-blue-400]="activeMobileTab() === 'chat'" [class.text-gray-500]="activeMobileTab() !== 'chat'">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+          Stream
+        </button>
+        <button (click)="activeMobileTab.set('docs')" class="flex-1 flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors relative" [class.text-purple-400]="activeMobileTab() === 'docs'" [class.text-gray-500]="activeMobileTab() !== 'docs'">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          <span>Docs & Contributions</span>
+          @if (collab.suggestions().length > 0) {
+            <span class="absolute top-2 right-4 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+              {{ collab.suggestions().length }}
+            </span>
+          }
+        </button>
+      </div>
+    </div>
     
-    <!-- Content Area: Flex row on Desktop, Stacked/Switched on Mobile -->
-    <div class="flex-1 flex overflow-hidden relative">
-      
-      <!-- Main Chat Area -->
-      <!-- Rules: Hidden on mobile if docs tab is active. Always displayed as flex on desktop. -->
-      <div class="flex-1 min-w-0 flex flex-col z-0 transition-opacity duration-200"
-           [class.hidden]="activeMobileTab() === 'docs'"
-           class="md:flex">
-         <app-chat-view class="h-full w-full"></app-chat-view>
-      </div>
-
-      <!-- Sidebar (Docs & Suggestions) -->
-      <!-- Rules: Hidden on mobile if chat tab is active. Always displayed on desktop with fixed width. -->
-      <div class="w-full md:w-80 flex-shrink-0 z-10 shadow-xl border-l border-gray-800 bg-gray-950 transition-transform duration-200"
-           [class.hidden]="activeMobileTab() === 'chat'"
-           class="md:flex">
-         <app-doc-manager class="h-full w-full"></app-doc-manager>
-      </div>
-    </div>
-
-    <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
-    <div class="md:hidden bg-gray-800 border-t border-gray-700 h-16 flex flex-shrink-0 z-50 pb-safe">
-      <button 
-        (click)="activeMobileTab.set('chat')"
-        class="flex-1 flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
-        [class.text-blue-400]="activeMobileTab() === 'chat'"
-        [class.text-gray-500]="activeMobileTab() !== 'chat'">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-        Stream
-      </button>
-      
-      <button 
-        (click)="activeMobileTab.set('docs')"
-        class="flex-1 flex flex-col items-center justify-center gap-1 text-xs font-medium transition-colors relative"
-        [class.text-purple-400]="activeMobileTab() === 'docs'"
-        [class.text-gray-500]="activeMobileTab() !== 'docs'">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <span>Docs & Suggestions</span>
-        @if (collab.suggestions().length > 0) {
-          <span class="absolute top-2 right-12 md:right-8 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
-            {{ collab.suggestions().length }}
-          </span>
-        }
-      </button>
-    </div>
+    <!-- Floating Video Call Component -->
+    <app-video-call></app-video-call>
   </div>
 }
