@@ -19,58 +19,62 @@ export class GeminiService {
     currentPrompt: string
   ): Promise<string> {
     
-    // Construct context from documents
-    const docContext = documents.map(d => `DOCUMENT TITLE: ${d.title}\nCONTENT:\n${d.content}`).join('\n\n');
+    // Construct context from documents with visual delimiters
+    const docContext = documents.map((d, i) => 
+        `[[REFERENCE DOCUMENT ${i + 1}]]\nTITLE: ${d.title}\nCONTENT:\n${d.content}\n[[END DOCUMENT ${i + 1}]]`
+    ).join('\n\n');
     
-    const systemInstruction = `You are an expert collaborative writing assistant. 
-    You are helping a Lead Writer (Host) build a narrative. 
-    You have access to a set of reference documents provided by the Host.
-    Use these documents to inform your responses, ensuring consistency and factual accuracy based on the provided text.
+    // Enhanced System Instruction for "Best AI" behavior
+    const systemInstruction = `You are an elite collaborative writing partner and narrative architect. 
+    You are assisting a Lead Writer (Host) in crafting a complex, high-quality narrative.
     
-    Style: Professional, articulate, and creative.
+    ### CORE DIRECTIVES:
+    1. **Context Awareness**: You have access to reference documents. You MUST strictly adhere to the facts, tone, and lore established in these documents when they are relevant.
+    2. **Style**: Your output should be sophisticated, professional, and creatively rich. Avoid generic tropes. Adapt to the tone set by the Host.
+    3. **Role**: You are not just a chatbot; you are a co-author. Offer concrete continuations, specific dialogue, or vivid descriptions rather than just advice, unless asked for advice.
+    4. **Formatting**: Use Markdown to structure your response. Use bolding for emphasis on key narrative turns.
     
-    Start of Reference Documents:
-    ${docContext}
-    End of Reference Documents.
+    ### REFERENCE MATERIAL:
+    ${docContext || "No reference documents provided yet."}
+    
+    ### INSTRUCTION:
+    Respond to the Host's latest input. If they ask for a continuation, write it. If they ask for analysis, provide deep insight.
     `;
 
-    // Convert history to a chat format string or keep it simple for this single-turn generation with context
-    // We will use a chat session for continuity if possible, but for this stateless request style, we'll build a prompt.
-    // Ideally, we use sendMessage with history.
-    
     try {
         const chat = this.ai.chats.create({
             model: this.modelId,
             config: {
                 systemInstruction: systemInstruction,
+                temperature: 0.8, // Slightly higher for creativity
+                topK: 40
             }
         });
 
-        // Seed history - in a real app we might replay the whole history, 
-        // but for now, we'll just send the current prompt as if it's the continuation.
-        // A robust solution would map the 'history' array to the history property of chat.create,
-        // but the types for role mapping can be tricky. We will append previous context to the prompt for simplicity
-        // or just trust the user provided context is enough.
-        
-        // Let's rely on the prompt context for now to keep it stateless and robust.
+        // Build the prompt with history context manually to ensure robust stateless execution
         let fullPrompt = "";
-        if (history.length > 0) {
-            fullPrompt += "PREVIOUS CONVERSATION CONTEXT:\n";
-            history.forEach(msg => {
-                fullPrompt += `${msg.role.toUpperCase()}: ${msg.text}\n`;
+        
+        // Add limited history window (last 10 turns) to prevent context overflow while maintaining thread
+        const recentHistory = history.slice(-10);
+        
+        if (recentHistory.length > 0) {
+            fullPrompt += "--- PREVIOUS STORY CONTEXT ---\n";
+            recentHistory.forEach(msg => {
+                fullPrompt += `${msg.role === 'host' ? 'HOST' : 'AI'}: ${msg.text}\n\n`;
             });
-            fullPrompt += "\nCURRENT REQUEST:\n";
+            fullPrompt += "--- END CONTEXT ---\n\n";
         }
-        fullPrompt += currentPrompt;
+        
+        fullPrompt += `HOST'S CURRENT REQUEST: ${currentPrompt}`;
 
         const response = await chat.sendMessage({
             message: fullPrompt
         });
 
-        return response.text || "No response generated.";
+        return response.text || "I'm listening, but I couldn't generate a response. Please try again.";
     } catch (error) {
         console.error('Gemini API Error:', error);
-        return "Error interacting with AI. Please check your API key or connection.";
+        return "System Alert: I am having trouble connecting to the creative engine. Please check your network or API key.";
     }
   }
 }

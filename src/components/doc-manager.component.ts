@@ -37,7 +37,35 @@ import { CollaborationService } from '../services/collaboration.service';
           <div class="space-y-4">
             @if (collab.userRole() === 'host') {
               <div class="bg-gray-900 rounded-lg p-3 border border-gray-800">
-                <h3 class="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Add Context</h3>
+                <h3 class="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Add Context</h3>
+                
+                <!-- File Upload Zone -->
+                <div class="mb-4">
+                  <input 
+                    #fileInput
+                    type="file" 
+                    class="hidden" 
+                    (change)="handleFileUpload($event)"
+                    accept=".txt,.md,.json,.csv,.js,.ts,.html,.css" 
+                  />
+                  <button 
+                    (click)="fileInput.click()"
+                    class="w-full py-3 border-2 border-dashed border-gray-700 bg-gray-800/50 hover:bg-gray-800 hover:border-blue-500 hover:text-blue-400 text-gray-400 rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Upload Text File
+                  </button>
+                  <p class="text-[10px] text-gray-500 text-center mt-1">
+                    Supports .txt, .md, .json, .csv
+                  </p>
+                </div>
+
+                <div class="relative flex items-center justify-center mb-4">
+                   <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-800"></div></div>
+                   <span class="relative bg-gray-900 px-2 text-[10px] text-gray-500 uppercase">Or type manually</span>
+                </div>
+
                 <input 
                   [(ngModel)]="newDocTitle"
                   placeholder="Document Title"
@@ -46,7 +74,7 @@ import { CollaborationService } from '../services/collaboration.service';
                 <textarea 
                   [(ngModel)]="newDocContent"
                   placeholder="Paste text content here..."
-                  rows="3"
+                  rows="5"
                   class="w-full bg-gray-800 border border-gray-700 rounded p-3 md:p-2 text-base md:text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
                 ></textarea>
                 <button 
@@ -59,16 +87,18 @@ import { CollaborationService } from '../services/collaboration.service';
             }
 
             @for (doc of collab.documents(); track doc.id) {
-              <div class="bg-gray-900 rounded-lg p-3 border border-gray-800 hover:border-gray-600 transition-colors">
+              <div class="bg-gray-900 rounded-lg p-3 border border-gray-800 hover:border-gray-600 transition-colors group">
                 <div class="flex items-start justify-between">
                   <div class="flex items-center gap-2 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     <h4 class="font-semibold text-sm text-gray-200">{{ doc.title }}</h4>
                   </div>
                 </div>
-                <p class="text-xs text-gray-400 line-clamp-3 bg-gray-950 p-2 rounded">{{ doc.content }}</p>
+                <div class="bg-gray-950 p-2 rounded border border-gray-800/50">
+                    <p class="text-xs text-gray-400 line-clamp-3 font-mono">{{ doc.content }}</p>
+                </div>
               </div>
             } @empty {
               <div class="text-center py-8 text-gray-600 text-sm">
@@ -155,6 +185,26 @@ export class DocManagerComponent {
   newDocTitle = '';
   newDocContent = '';
   suggestionText = '';
+
+  async handleFileUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    this.newDocTitle = file.name;
+
+    try {
+      // Modern text reading
+      const text = await file.text();
+      this.newDocContent = text;
+    } catch (e) {
+      console.error("Error reading file", e);
+      this.newDocContent = "Error reading file content. Please try pasting manually.";
+    }
+
+    // Reset so the same file can be selected again if needed
+    input.value = '';
+  }
 
   addDocument() {
     if (!this.newDocTitle || !this.newDocContent) return;
