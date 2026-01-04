@@ -104,6 +104,9 @@ export class CollaborationService {
         case 'NEW_DOCUMENT':
             this.documents.update(docs => [...docs, payload]);
             break;
+        case 'REMOVE_DOCUMENT':
+            this.documents.update(docs => docs.filter(d => d.id !== payload));
+            break;
         case 'NEW_SUGGESTION':
             this.suggestions.update(sugs => [payload, ...sugs]);
             break;
@@ -153,6 +156,11 @@ export class CollaborationService {
   addDocument(doc: DocumentItem) {
     this.documents.update(docs => [...docs, doc]);
     this.channel.postMessage({ type: 'NEW_DOCUMENT', payload: doc });
+  }
+
+  removeDocument(id: string) {
+    this.documents.update(docs => docs.filter(d => d.id !== id));
+    this.channel.postMessage({ type: 'REMOVE_DOCUMENT', payload: id });
   }
 
   addSuggestion(text: string, author: string = 'Anonymous Viewer') {

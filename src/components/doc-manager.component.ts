@@ -39,13 +39,36 @@ import { CollaborationService } from '../services/collaboration.service';
               <div class="bg-gray-900 rounded-lg p-3 border border-gray-800">
                 <h3 class="text-xs font-semibold text-gray-500 mb-3 uppercase tracking-wider">Add Context</h3>
                 
-                <div class="mb-4">
-                  <input #fileInput type="file" class="hidden" (change)="handleFileUpload($event)" accept=".txt,.md,.json,.csv,.js,.ts,.html,.css" />
-                  <button (click)="fileInput.click()" class="w-full py-3 border-2 border-dashed border-gray-700 bg-gray-800/50 hover:bg-gray-800 hover:border-blue-500 hover:text-blue-400 text-gray-400 rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                    Upload Text File
-                  </button>
-                  <p class="text-[10px] text-gray-500 text-center mt-1">Supports .txt, .md, .json, .csv</p>
+                <!-- Drop Zone -->
+                <div 
+                    (dragover)="onDragOver($event)"
+                    (dragleave)="onDragLeave($event)"
+                    (drop)="onDrop($event)"
+                    class="mb-4 relative group cursor-pointer">
+                  
+                  <input #fileInput type="file" multiple class="hidden" (change)="handleFileUpload($event)" accept=".txt,.md,.json,.csv,.js,.ts,.html,.css,.py,.java" />
+                  
+                  <div (click)="fileInput.click()" 
+                       class="w-full py-6 border-2 border-dashed rounded-lg transition-all flex flex-col items-center justify-center gap-2 text-sm font-medium p-4 text-center"
+                       [class.border-blue-500]="isDragging()"
+                       [class.bg-blue-900/20]="isDragging()"
+                       [class.text-blue-400]="isDragging()"
+                       [class.border-gray-700]="!isDragging()"
+                       [class.bg-gray-800/50]="!isDragging()"
+                       [class.text-gray-400]="!isDragging()"
+                       [class.hover:bg-gray-800]="!isDragging()"
+                       [class.hover:border-blue-500]="!isDragging()"
+                       [class.hover:text-blue-400]="!isDragging()">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <span>{{ isDragging() ? 'Drop files here' : 'Click to Upload or Drag & Drop' }}</span>
+                    <p class="text-[10px] text-gray-500 mt-1">
+                        Text files only (.txt, .md, code, etc.)<br>
+                        Multiple files supported
+                    </p>
+                  </div>
                 </div>
 
                 <div class="relative flex items-center justify-center mb-4">
@@ -55,22 +78,27 @@ import { CollaborationService } from '../services/collaboration.service';
 
                 <input [(ngModel)]="newDocTitle" placeholder="Document Title" class="w-full bg-gray-800 border border-gray-700 rounded p-3 md:p-2 text-base md:text-sm text-white mb-3 md:mb-2 placeholder-gray-500 focus:border-blue-500 focus:outline-none" />
                 <textarea [(ngModel)]="newDocContent" placeholder="Paste text content here..." rows="5" class="w-full bg-gray-800 border border-gray-700 rounded p-3 md:p-2 text-base md:text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"></textarea>
-                <button (click)="addDocument()" [disabled]="!newDocTitle || !newDocContent" class="mt-3 md:mt-2 w-full py-3 md:py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm md:text-xs font-bold rounded transition-colors disabled:opacity-50 touch-manipulation">
-                  + Add Document
+                <button (click)="addManualDocument()" [disabled]="!newDocTitle || !newDocContent" class="mt-3 md:mt-2 w-full py-3 md:py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm md:text-xs font-bold rounded transition-colors disabled:opacity-50 touch-manipulation">
+                  + Add Manually
                 </button>
               </div>
             }
 
             @for (doc of collab.documents(); track doc.id) {
-              <div class="bg-gray-900 rounded-lg p-3 border border-gray-800 hover:border-gray-600 transition-colors group">
+              <div class="bg-gray-900 rounded-lg p-3 border border-gray-800 hover:border-gray-600 transition-colors group relative">
+                @if (collab.userRole() === 'host') {
+                    <button (click)="removeDocument(doc.id)" class="absolute top-2 right-2 p-1 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity" title="Remove Document">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                }
                 <div class="flex items-start justify-between">
                   <div class="flex items-center gap-2 mb-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     <h4 class="font-semibold text-sm text-gray-200">{{ doc.title }}</h4>
                   </div>
                 </div>
-                <div class="bg-gray-950 p-2 rounded border border-gray-800/50">
-                    <p class="text-xs text-gray-400 line-clamp-3 font-mono">{{ doc.content }}</p>
+                <div class="bg-gray-950 p-2 rounded border border-gray-800/50 max-h-32 overflow-y-auto">
+                    <p class="text-xs text-gray-400 font-mono whitespace-pre-wrap">{{ doc.content }}</p>
                 </div>
               </div>
             } @empty {
@@ -129,26 +157,64 @@ export class DocManagerComponent {
   newDocTitle = '';
   newDocContent = '';
   suggestionText = '';
+  isDragging = signal(false);
+
+  // Drag handlers
+  onDragOver(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.isDragging.set(false);
+  }
+
+  async onDrop(e: DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.isDragging.set(false);
+    if (e.dataTransfer?.files) {
+      await this.processFiles(e.dataTransfer.files);
+    }
+  }
 
   async handleFileUpload(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const file = input.files[0];
-    this.newDocTitle = file.name;
-    try {
-      this.newDocContent = await file.text();
-    } catch (e) {
-      console.error("Error reading file", e);
-      this.newDocContent = "Error reading file content. Please try pasting manually.";
+    if (input.files?.length) {
+      await this.processFiles(input.files);
     }
     input.value = '';
   }
 
-  addDocument() {
+  async processFiles(fileList: FileList) {
+    for (let i = 0; i < fileList.length; i++) {
+      const file = fileList[i];
+      try {
+        const content = await file.text();
+        this.collab.addDocument({
+          id: crypto.randomUUID(),
+          title: file.name,
+          content: content
+        });
+      } catch (e) {
+        console.error("Error reading file", file.name, e);
+        // Silently fail for binary files in this demo, or we could add a toast notification service
+      }
+    }
+  }
+
+  addManualDocument() {
     if (!this.newDocTitle || !this.newDocContent) return;
     this.collab.addDocument({ id: crypto.randomUUID(), title: this.newDocTitle, content: this.newDocContent });
     this.newDocTitle = '';
     this.newDocContent = '';
+  }
+  
+  removeDocument(id: string) {
+      this.collab.removeDocument(id);
   }
 
   submitSuggestion() {
