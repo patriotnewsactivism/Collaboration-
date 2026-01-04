@@ -1,3 +1,4 @@
+
 import { Injectable, signal, effect, OnDestroy } from '@angular/core';
 import Daily, { DailyCall, DailyParticipant } from '@daily-co/daily-js';
 
@@ -145,7 +146,8 @@ export class DailyService implements OnDestroy {
   private updateParticipants = () => {
     const co = this.callObject();
     if (!co) return;
-    const parts = Object.values(co.participants());
+    // Explicitly cast to DailyParticipant[] to ensure types are correct
+    const parts = Object.values(co.participants()) as DailyParticipant[];
     this.participants.set(parts);
     
     // Sync screen share state if we missed an event

@@ -24,9 +24,9 @@ import type { DailyParticipant } from '@daily-co/daily-js';
              <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
              <span class="text-xs font-semibold text-gray-300">Live Audio & Screen</span>
           </div>
-          <button (click)="isMinimized.update(v => !v)" class="p-1 hover:bg-gray-700 rounded text-gray-400">
+          <button (click)="toggleMinimize()" class="p-1 hover:bg-gray-700 rounded text-gray-400">
             @if(isMinimized()) {
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4-4l-5 5M4 16v4m0 0h4m-4-4l5-5m11 5v-4m0 0h-4m4 4l-5-5" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4-4l-5 5M4 16v4m0 0h4m-4-4l-5-5m11 5v-4m0 0h-4m4 4l-5-5" /></svg>
             } @else {
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" /></svg>
             }
@@ -185,6 +185,10 @@ export class VideoCallComponent implements AfterViewInit {
 
   ngAfterViewInit() {
       // Handled by effect
+  }
+
+  toggleMinimize() {
+    this.isMinimized.update(v => !v);
   }
 
   getParticipant(id?: string): DailyParticipant | undefined {
